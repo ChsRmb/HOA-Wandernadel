@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    var map = L.map('map').setView([52.46217, 10.60441], 18);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18
+    }).addTo(map);
+
+    fetch('/api/locations')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(location => {
+                var difficultyStars = '★'.repeat(location.difficulty)+ '☆'.repeat(5 - location.difficulty);
+                var terrainStars = '★'.repeat(location.terrain) + '☆'.repeat(5 - location.terrain);
+
+                var popupContent = `
+                    <h2>${location.name}</h2>
+                    <p>Difficulty: ${difficultyStars}</p>
+                    <p>Terrain: ${terrainStars}</p>
+                    <p>Description:<br>${location.description}</p>
+                    ${location.image_url ? `<img src="/static/${location.image_url}" width="200">` : ''}
+                `;
+
+                L.marker([location.latitude, location.longitude])
+                    .bindPopup(popupContent)
+                    .addTo(map);
+            });
+        });
+
+</script>
+</body>
+</html>
