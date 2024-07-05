@@ -1,9 +1,10 @@
 import io
 
-from flask import Blueprint, render_template, jsonify, send_file
-from app.models import Location, GeneralSettings
 import gpxpy
 import gpxpy.gpx
+from flask import Blueprint, jsonify, render_template, send_file
+
+from app.models import GeneralSettings, Location
 
 main = Blueprint("main", __name__)
 
@@ -29,7 +30,7 @@ def get_locations():
                 "image_url": loc.image_url,
                 "description": loc.description,
                 "type": loc.loc_type.name,
-                "enabled": loc.enabled
+                "enabled": loc.enabled,
             }
             for loc in locations
         ]
@@ -45,11 +46,9 @@ def download_gpx(location_id):
     gpx_segment = gpxpy.gpx.GPXTrackSegment()
     gpx_track.segments.append(gpx_segment)
 
-    gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(
-        latitude=location.latitude,
-        longitude=location.longitude,
-        name=location.name
-    ))
+    gpx_segment.points.append(
+        gpxpy.gpx.GPXTrackPoint(latitude=location.latitude, longitude=location.longitude, name=location.name)
+    )
     gpx_data = gpx.to_xml()
     return send_file(
         io.BytesIO(gpx_data.encode("utf-8")),

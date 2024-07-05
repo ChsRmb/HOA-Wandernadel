@@ -1,15 +1,15 @@
-from flask_admin.contrib.sqla import ModelView
-from flask_admin.form import SecureForm
-from werkzeug.utils import secure_filename
-from wtforms import PasswordField, SelectField, BooleanField
-from flask_admin.form import ImageUploadField, FileUploadField
 from pathlib import Path
+
+from flask import current_app, redirect, url_for
 from flask_admin import AdminIndexView
+from flask_admin.contrib.sqla import ModelView
+from flask_admin.form import FileUploadField, ImageUploadField, SecureForm
 from flask_login import current_user
-from flask import redirect, url_for, current_app
+from werkzeug.utils import secure_filename
+from wtforms import BooleanField, PasswordField, SelectField
 
 from app import admin, db
-from app.models import Location, User, Year, LocationType, GeneralSettings
+from app.models import GeneralSettings, Location, LocationType, User, Year
 
 
 class SecureAdminIndexView(AdminIndexView):
@@ -65,7 +65,7 @@ class LocationAdmin(AdminView):
         "image_url",
         "enabled",
         "year",
-        "loc_type"
+        "loc_type",
     )
 
     @staticmethod
@@ -83,8 +83,30 @@ class LocationAdmin(AdminView):
 
 
 class GeneralAdmin(AdminView):
-    column_list = ('latitude', 'longitude', 'zoom_level', 'marker', 'marker_width', 'marker_height', 'marker_anchor_x', 'marker_anchor_y', 'marker_popup_anchor_x', 'marker_popup_anchor_y')
-    form_columns = ('latitude', 'longitude', 'zoom_level', 'marker', 'marker_width', 'marker_height', 'marker_anchor_x', 'marker_anchor_y', 'marker_popup_anchor_x', 'marker_popup_anchor_y')
+    column_list = (
+        "latitude",
+        "longitude",
+        "zoom_level",
+        "marker",
+        "marker_width",
+        "marker_height",
+        "marker_anchor_x",
+        "marker_anchor_y",
+        "marker_popup_anchor_x",
+        "marker_popup_anchor_y",
+    )
+    form_columns = (
+        "latitude",
+        "longitude",
+        "zoom_level",
+        "marker",
+        "marker_width",
+        "marker_height",
+        "marker_anchor_x",
+        "marker_anchor_y",
+        "marker_popup_anchor_x",
+        "marker_popup_anchor_y",
+    )
     can_create = False
     can_delete = False
     can_view_details = False

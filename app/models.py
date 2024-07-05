@@ -1,9 +1,11 @@
 from typing import Optional
 
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
-from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask import current_app
+from flask_login import UserMixin
+from itsdangerous import BadSignature, SignatureExpired
+from itsdangerous import URLSafeTimedSerializer as Serializer
+from werkzeug.security import check_password_hash, generate_password_hash
+
 from app import db
 
 
@@ -38,7 +40,7 @@ class User(UserMixin, db.Model):
         s = Serializer(current_app.config["SECRET_KEY"])
         try:
             user_id = s.loads(token)["user_id"]
-        except:
+        except (SignatureExpired, BadSignature):
             return None
         return User.query.get(user_id)
 
@@ -98,7 +100,7 @@ class Location(db.Model):
         image_url: Optional[str] = None,
         enabled: bool = True,
         year=None,
-        loc_type=None
+        loc_type=None,
     ):
         self.name = name
         self.description = description
@@ -129,17 +131,17 @@ class GeneralSettings(db.Model):
     marker_popup_anchor_y: Optional[int] = db.Column(db.Integer, nullable=True)
 
     def __init__(
-            self,
-            latitude: float,
-            longitude: float,
-            zoom_level: int,
-            marker: Optional[str] = None,
-            marker_width: Optional[int] = None,
-            marker_height: Optional[int] = None,
-            marker_anchor_x: Optional[int] = None,
-            marker_anchor_y: Optional[int] = None,
-            marker_popup_anchor_x: Optional[int] = None,
-            marker_popup_anchor_y: Optional[int] = None,
+        self,
+        latitude: float,
+        longitude: float,
+        zoom_level: int,
+        marker: Optional[str] = None,
+        marker_width: Optional[int] = None,
+        marker_height: Optional[int] = None,
+        marker_anchor_x: Optional[int] = None,
+        marker_anchor_y: Optional[int] = None,
+        marker_popup_anchor_x: Optional[int] = None,
+        marker_popup_anchor_y: Optional[int] = None,
     ):
         self.latitude = latitude
         self.longitude = longitude

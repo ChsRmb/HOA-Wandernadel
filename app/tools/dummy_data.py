@@ -1,5 +1,5 @@
-from app.models import User, LocationType, GeneralSettings
 from app import db
+from app.models import GeneralSettings, LocationType, User
 
 
 def create_dummy_data():
@@ -10,18 +10,9 @@ def create_dummy_data():
 
     if not LocationType.query.first():
         type_example = [
-            {
-                "name": "Normal",
-                "description": "Single hikingpin"
-            },
-            {
-                "name": "Multi",
-                "description": "This is a multi hikingpin, with multiple stations"
-            },
-            {
-                "name": "Mystery",
-                "description": "First you have to solve a puzzle to find the hikingpin"
-            }
+            {"name": "Normal", "description": "Single hikingpin"},
+            {"name": "Multi", "description": "This is a multi hikingpin, with multiple stations"},
+            {"name": "Mystery", "description": "First you have to solve a puzzle to find the hikingpin"},
         ]
 
         for types in type_example:

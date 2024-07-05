@@ -1,12 +1,12 @@
 from flask import Flask
 from flask_admin import Admin
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from config import Config
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import inspect
 
+from config import Config
 
 db = SQLAlchemy()
 admin = Admin(name="HOA Wandernadel", template_mode="bootstrap4")
@@ -45,6 +45,7 @@ def create_app():
         if not inspector.get_table_names():
             db.create_all()
             from app.tools.dummy_data import create_dummy_data
+
             create_dummy_data()
 
         # Configure Admin panel

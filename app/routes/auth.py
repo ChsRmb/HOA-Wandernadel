@@ -1,9 +1,18 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required, current_user
-from app.models import User
-from app import db, mail
+from flask import (
+    Blueprint,
+    current_app,
+    flash,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
+from flask_login import login_required, login_user, logout_user
 from flask_mail import Message
+from werkzeug.security import generate_password_hash
+
+from app import db, mail
+from app.models import User
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -57,7 +66,7 @@ def reset_password(token):
 
 def send_password_reset_email(user):
     token = user.get_reset_password_token()
-    msg = Message("Password Reset Request", sender=app.config["MAIL_USERNAME"], recipients=[user.email])
+    msg = Message("Password Reset Request", sender=current_app.config["MAIL_USERNAME"], recipients=[user.email])
     msg.body = f"""To reset your password, visit the following link:
 {url_for('auth.reset_password', token=token, _external=True)}
 If you did not make this request then simply ignore this email and no changes will be made.
