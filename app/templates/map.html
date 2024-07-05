@@ -21,30 +21,50 @@
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-    var map = L.map('map').setView([52.46217, 10.60441], 18);
+    var map = L.map('map').setView([{{ settings.latitude }}, {{ settings.longitude }}], {{ settings.zoom_level }});
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 18
     }).addTo(map);
 
+    {% if settings.marker %}
+    var icon = L.icon({
+        iconUrl: "{{ "/static/" + settings.marker }}",
+        {% if settings.marker_width is not none and settings.marker_height is not none %}
+        iconSize: [{{ settings.marker_width }}, {{ settings.marker_height }}],
+        {% endif %}
+        {% if settings.marker_anchor_x is not none and settings.marker_anchor_y is not none %}
+        iconAnchor:   [{{ settings.marker_anchor_x }}, {{ settings.marker_anchor_y }}],
+        {% endif %}
+        {% if settings.marker_popup_x is not none and settings.marker_popup_anchor_y is not none %}
+        popupAnchor:  [{{ settings.marker_popup_x }}, {{ settings.marker_popup_anchor_y }}]
+        {% endif %}
+    })
+    {% endif %}
+
     fetch('/api/locations')
         .then(response => response.json())
         .then(data => {
             data.forEach(location => {
-                var difficultyStars = '★'.repeat(location.difficulty)+ '☆'.repeat(5 - location.difficulty);
-                var terrainStars = '★'.repeat(location.terrain) + '☆'.repeat(5 - location.terrain);
+                if (location.enabled) {
+                    var difficultyStars = '★'.repeat(location.difficulty)+ '☆'.repeat(5 - location.difficulty);
+                    var terrainStars = '★'.repeat(location.terrain) + '☆'.repeat(5 - location.terrain);
 
-                var popupContent = `
+                    var popupContent = `
                     <h2>${location.name}</h2>
+                    <p>Type: ${location.type}</p>
                     <p>Difficulty: ${difficultyStars}</p>
                     <p>Terrain: ${terrainStars}</p>
                     <p>Description:<br>${location.description}</p>
                     ${location.image_url ? `<img src="/static/${location.image_url}" width="200">` : ''}
-                `;
+                    <a href="/gpx/${location.id}" download>Download GPX</a>
+                    `;
 
-                L.marker([location.latitude, location.longitude])
-                    .bindPopup(popupContent)
-                    .addTo(map);
+                    L.marker(
+                        [location.latitude, location.longitude]{{ ", {icon: icon}" if settings.marker else "" }})
+                        .bindPopup(popupContent)
+                        .addTo(map);
+                }
             });
         });
 

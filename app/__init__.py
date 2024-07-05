@@ -1,24 +1,18 @@
 from flask import Flask
 from flask_admin import Admin
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from config import Config
 from flask_login import LoginManager
 from flask_mail import Mail
+from sqlalchemy import inspect
 
 
 db = SQLAlchemy()
 admin = Admin(name="HOA Wandernadel", template_mode="bootstrap4")
 login_manager = LoginManager()
 mail = Mail()
-
-
-def create_dummy_user():
-    from app.models import User
-
-    if not User.query.first():
-        example = User(username="admin", email="example@example.com", password="admin")
-        db.session.add(example)
-        db.session.commit()
+migrate = Migrate()
 
 
 def create_app():
@@ -27,6 +21,7 @@ def create_app():
 
     db.init_app(app)
     #    admin.init_app(app)
+    migrate.init_app(app, db)
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
     mail.init_app(app)
@@ -46,8 +41,11 @@ def create_app():
         return User.query.get(int(user_id))
 
     with app.app_context():
-        db.create_all()
-        create_dummy_user()
+        inspector = inspect(db.engine)
+        if not inspector.get_table_names():
+            db.create_all()
+            from app.tools.dummy_data import create_dummy_data
+            create_dummy_data()
 
         # Configure Admin panel
         from app.admin import setup_admin
